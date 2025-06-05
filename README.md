@@ -1,98 +1,195 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Установите Node.js и npm (если еще не установлено)
+sudo apt update
+sudo apt install -y nodejs npm
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# Установите postgre 
+sudo apt update
+sudo apt install -y postgresql postgresql-contrib
+sudo service postgresql start
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Клонируйте репозиторий и установите зависимости
+git clone https://github.com/Dogo202/greyball.git
+cd greyball/mma-platform-backend
+npm install
 
-## Description
+#**Создайте бд**
+sudo psql -U postgres
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+CREATE DATABASE mma_db;
+CREATE USER mmadev WITH PASSWORD 'password';
+GRANT ALL PRIVILEGES ON DATABASE mma_db TO mmadev;
 
-## Project setup
+Проверьте права на схему
+\c mma_db
+GRANT ALL ON SCHEMA public TO mma_admin;
 
-```bash
-$ npm install
-```
+#**проверьте ENV**
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=mmadev
+DB_PASSWORD=password
+DB_DATABASE=mma_db
 
-## Compile and run the project
+#**Запуск проекта**
+npm run start:dev
 
-```bash
-# development
-$ npm run start
+Открой в браузере: http://localhost:3000/graphql
+Работает GraphQL Playground.
 
-# watch mode
-$ npm run start:dev
 
-# production mode
-$ npm run start:prod
-```
+Мутации 
+создание весовых категорий
+mutation {
+  Lightweight: createWeightClass(input: { name: "Lightweight", min_weight: 65.0, max_weight: 70.0 }) { id name }
+  Middleweight: createWeightClass(input: { name: "Middleweight", min_weight: 70.1, max_weight: 80.0 }) { id name }
+  Heavyweight: createWeightClass(input: { name: "Heavyweight", min_weight: 80.1, max_weight: 120.0 }) { id name }
+}
 
-## Run tests
+Обновление
+mutation {
+  updateWeightClass(input: { id: 1, name: "Lightweight Updated" }) {
+    id name
+  }
+}
 
-```bash
-# unit tests
-$ npm run test
+удаление
+mutation {
+  removeWeightClass(id: 1)
+}
 
-# e2e tests
-$ npm run test:e2e
+выбор всех
+query {
+  weightClasses {
+    id name min_weight max_weight
+  }
+}
 
-# test coverage
-$ npm run test:cov
-```
 
-## Deployment
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Создать бойцов (по 3 на каждую категорию)
+mutation {
+  f1: createFighter(input: { firstName: "Ivan", lastName: "Ivanov", weight: 68 }) { id }
+  f2: createFighter(input: { firstName: "Sergey", lastName: "Petrov", weight: 67 }) { id }
+  f3: createFighter(input: { firstName: "John", lastName: "Smith", weight: 69 }) { id }
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+  f4: createFighter(input: { firstName: "Daniyar", lastName: "Tulegenov", weight: 75 }) { id }
+  f5: createFighter(input: { firstName: "Alex", lastName: "Johnson", weight: 78 }) { id }
+  f6: createFighter(input: { firstName: "Murad", lastName: "Akhmedov", weight: 72 }) { id }
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+  f7: createFighter(input: { firstName: "Rustam", lastName: "Ibragimov", weight: 90 }) { id }
+  f8: createFighter(input: { firstName: "Dmitry", lastName: "Volkov", weight: 95 }) { id }
+  f9: createFighter(input: { firstName: "Erzhan", lastName: "Zhaksylykov", weight: 100 }) { id }
+}
 
-## Resources
+обновить бойца
+mutation {
+  updateFighter(input: { id: 1, nickname: "New Nickname" }) {
+    id nickname
+  }
+}
 
-Check out a few resources that may come in handy when working with NestJS:
+удалить бойца
+mutation {
+  removeFighter(id: 1)
+}
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+выбрать всех
+query {
+  fighters {
+    id firstName lastName
+  }
+}
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Создать события (events) на 3 дня
 
-## License
+mutation {
+  day1: createEvent(input: { name: "Grand Prix Day 1", location: "Almaty Arena", date: "2025-07-10", participantIds: [1, 2, 3] }) { id }
+  day2: createEvent(input: { name: "Grand Prix Day 2", location: "Almaty Arena", date: "2025-07-11", participantIds: [4, 5, 6] }) { id }
+  day3: createEvent(input: { name: "Grand Prix Day 3", location: "Almaty Arena", date: "2025-07-12", participantIds: [7, 8, 9] }) { id }
+}
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+обновить событие
+mutation {
+  updateEvent(input: { id: 1, name: "Event Updated" }) {
+    id name
+  }
+}
+
+удалить 
+mutation {
+  removeEvent(id: 1)
+}
+
+выбрать все
+query {
+  events {
+    id name location date
+  }
+}
+
+
+
+Создать бои 
+mutation {
+  fight1: createFight(input: { eventId: 1, fighterRedId: 1, fighterBlueId: 2, winnerId: 1, method: "KO", round: "1", time: "00:30" }) { id }
+  fight2: createFight(input: { eventId: 1, fighterRedId: 2, fighterBlueId: 3, winnerId: 3, method: "Decision", round: "3", time: "05:00" }) { id }
+  fight3: createFight(input: { eventId: 2, fighterRedId: 4, fighterBlueId: 5, winnerId: 4, method: "Submission", round: "2", time: "02:20" }) { id }
+  fight4: createFight(input: { eventId: 2, fighterRedId: 5, fighterBlueId: 6, winnerId: 5, method: "TKO", round: "1", time: "01:45" }) { id }
+  fight5: createFight(input: { eventId: 3, fighterRedId: 7, fighterBlueId: 8, winnerId: 7, method: "Decision", round: "3", time: "05:00" }) { id }
+  fight6: createFight(input: { eventId: 3, fighterRedId: 8, fighterBlueId: 9, winnerId: 8, method: "KO", round: "2", time: "01:15" }) { id }
+}
+
+обновить бой 
+mutation {
+  updateFight(input: { id: 1, method: "Decision" }) {
+    id method
+  }
+}
+
+удалить бой
+mutation {
+  removeFight(id: 1)
+}
+
+выбрать все бои
+query {
+  fights {
+    id method round time
+  }
+}
+
+
+Ранги
+mutation {
+  r1: createRanking(input: { fighterId: 1, weightClassId: 1, points: 5, position: 1 }) { id }
+  r2: createRanking(input: { fighterId: 2, weightClassId: 1, points: 2, position: 2 }) { id }
+  r3: createRanking(input: { fighterId: 3, weightClassId: 1, points: 1, position: 3 }) { id }
+}
+
+обновить запись ранга
+mutation {
+  updateRanking(id: 1, input: { points: 10, position: 2 }) {
+    id points position
+  }
+}
+
+Удалить
+mutation {
+  removeRanking(id: 1)
+}
+
+выбрать все
+query {
+  rankings {
+    id points position
+  }
+}
+
+
+
+
+
